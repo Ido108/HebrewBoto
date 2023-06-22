@@ -1,0 +1,384 @@
+Core classes, functions, and methods:
+- `HebrewText`: A class representing a piece of Hebrew text. It should have methods for getting the text, setting the text, and getting the number of words in the text.
+- `HebrewTokenizer`: A class for tokenizing Hebrew text into individual words. It should have a method for tokenizing a given piece of text.
+- `HebrewSpellChecker`: A class for checking the spelling of Hebrew words. It should have a method for checking the spelling of a given word.
+- `HebrewGrammarChecker`: A class for checking the grammar of Hebrew text. It should have a method for checking the grammar of a given piece of text.
+- `HebrewVocabularyBuilder`: A class for building a vocabulary of Hebrew words from a given piece of text. It should have a method for building the vocabulary.
+- `HebrewQuizGenerator`: A class for generating quizzes based on a given piece of Hebrew text. It should have a method for generating a quiz.
+
+src/__init__.py
+```python
+# Empty file
+```
+
+src/app.py
+```python
+from flask import Flask, render_template, request
+from hebrew_text import HebrewText
+from hebrew_tokenizer import HebrewTokenizer
+from hebrew_spell_checker import HebrewSpellChecker
+from hebrew_grammar_checker import HebrewGrammarChecker
+from hebrew_vocabulary_builder import HebrewVocabularyBuilder
+from hebrew_quiz_generator import HebrewQuizGenerator
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/spell_check', methods=['POST'])
+def spell_check():
+    text = request.form['text']
+    tokenizer = HebrewTokenizer()
+    spell_checker = HebrewSpellChecker()
+    words = tokenizer.tokenize(text)
+    misspelled_words = []
+    for word in words:
+        if not spell_checker.check_spelling(word):
+            misspelled_words.append(word)
+    return {'misspelled_words': misspelled_words}
+
+@app.route('/grammar_check', methods=['POST'])
+def grammar_check():
+    text = request.form['text']
+    grammar_checker = HebrewGrammarChecker()
+    return {'errors': grammar_checker.check_grammar(text)}
+
+@app.route('/vocabulary', methods=['POST'])
+def vocabulary():
+    text = request.form['text']
+    tokenizer = HebrewTokenizer()
+    vocabulary_builder = HebrewVocabularyBuilder()
+    words = tokenizer.tokenize(text)
+    vocabulary = vocabulary_builder.build_vocabulary(words)
+    return {'vocabulary': vocabulary}
+
+@app.route('/quiz', methods=['POST'])
+def quiz():
+    text = request.form['text']
+    quiz_generator = HebrewQuizGenerator()
+    quiz = quiz_generator.generate_quiz(text)
+    return {'quiz': quiz}
+
+if __name__ == '__main__':
+    app.run()
+```
+
+src/hebrew_text.py
+```python
+class HebrewText:
+    def __init__(self, text):
+        self.text = text
+
+    def get_text(self):
+        return self.text
+
+    def set_text(self, text):
+        self.text = text
+
+    def get_num_words(self):
+        return len(self.text.split())
+```
+
+src/hebrew_tokenizer.py
+```python
+import re
+
+class HebrewTokenizer:
+    def __init__(self):
+        self.pattern = re.compile(r'[\u0590-\u05FF]+')
+
+    def tokenize(self, text):
+        return self.pattern.findall(text)
+```
+
+src/hebrew_spell_checker.py
+```python
+class HebrewSpellChecker:
+    def __init__(self):
+        self.dictionary = set(['אבגדהוזחטיכלמנסעפצקרשת'])
+
+    def check_spelling(self, word):
+        return set(word).issubset(self.dictionary)
+```
+
+src/hebrew_grammar_checker.py
+```python
+import re
+
+class HebrewGrammarChecker:
+    def __init__(self):
+        self.pattern = re.compile(r'[\u0590-\u05FF]+')
+
+    def check_grammar(self, text):
+        errors = []
+        words = self.pattern.findall(text)
+        for i in range(len(words) - 1):
+            if words[i][-2:] == 'הם' and words[i+1][:2] == 'של':
+                errors.append(f'Error: "{words[i]} {words[i+1]}" violates grammar rules')
+        return errors
+```
+
+src/hebrew_vocabulary_builder.py
+```python
+class HebrewVocabularyBuilder:
+    def build_vocabulary(self, words):
+        return sorted(set(words))
+```
+
+src/hebrew_quiz_generator.py
+```python
+import random
+
+class HebrewQuizGenerator:
+    def generate_quiz(self, text):
+        tokenizer = HebrewTokenizer()
+        words = tokenizer.tokenize(text)
+        quiz = []
+        for word in words:
+            if len(word) > 2:
+                quiz.append({'word': word, 'options': self._generate_options(word)})
+        return quiz
+
+    def _generate_options(self, word):
+        options = [word]
+        while len(options) < 4:
+            option = ''.join(random.sample(word, len(word)))
+            if option not in options:
+                options.append(option)
+        random.shuffle(options)
+        return options
+```
+
+tests/__init__.py
+```python
+# Empty file
+```
+
+tests/test_hebrew_text.py
+```python
+from hebrew_text import HebrewText
+
+def test_get_text():
+    text = 'זהו טקסט בעברית'
+    hebrew_text = HebrewText(text)
+    assert hebrew_text.get_text() == text
+
+def test_set_text():
+    text = 'זהו טקסט בעברית'
+    new_text = 'זהו טקסט חדש בעברית'
+    hebrew_text = HebrewText(text)
+    hebrew_text.set_text(new_text)
+    assert hebrew_text.get_text() == new_text
+
+def test_get_num_words():
+    text = 'זהו טקסט בעברית'
+    hebrew_text = HebrewText(text)
+    assert hebrew_text.get_num_words() == 3
+```
+
+tests/test_hebrew_tokenizer.py
+```python
+from hebrew_tokenizer import HebrewTokenizer
+
+def test_tokenize():
+    text = 'זהו טקסט בעברית'
+    tokenizer = HebrewTokenizer()
+    assert tokenizer.tokenize(text) == ['זהו', 'טקסט', 'בעברית']
+```
+
+tests/test_hebrew_spell_checker.py
+```python
+from hebrew_spell_checker import HebrewSpellChecker
+
+def test_check_spelling():
+    spell_checker = HebrewSpellChecker()
+    assert spell_checker.check_spelling('זהו') == True
+    assert spell_checker.check_spelling('זהוו') == False
+```
+
+tests/test_hebrew_grammar_checker.py
+```python
+from hebrew_grammar_checker import HebrewGrammarChecker
+
+def test_check_grammar():
+    grammar_checker = HebrewGrammarChecker()
+    text = 'זהו טקסט שלא מפר את כללי הכתיב'
+    assert grammar_checker.check_grammar(text) == []
+    text = 'הם ספר של הספרים'
+    assert grammar_checker.check_grammar(text) == ['Error: "הם ספר של" violates grammar rules']
+```
+
+tests/test_hebrew_vocabulary_builder.py
+```python
+from hebrew_vocabulary_builder import HebrewVocabularyBuilder
+
+def test_build_vocabulary():
+    vocabulary_builder = HebrewVocabularyBuilder()
+    words = ['זהו', 'טקסט', 'בעברית', 'זהו', 'טקסט']
+    assert vocabulary_builder.build_vocabulary(words) == ['בעברית', 'זהו', 'טקסט']
+```
+
+tests/test_hebrew_quiz_generator.py
+```python
+from hebrew_quiz_generator import HebrewQuizGenerator
+
+def test_generate_quiz():
+    quiz_generator = HebrewQuizGenerator()
+    text = 'זהו טקסט בעברית'
+    quiz = quiz_generator.generate_quiz(text)
+    assert len(quiz) == 2
+    for question in quiz:
+        assert question['word'] in text
+        assert question['word'] in question['options']
+        assert len(question['options']) == 4
+```
+
+
+docs/documentation.md
+```
+# HebrewBoto Documentation
+
+## Introduction
+
+HebrewBoto is a Python package for working with Hebrew text. It provides functionality for tokenizing Hebrew text, checking the spelling and grammar of Hebrew text, building a vocabulary of Hebrew words, and generating quizzes based on Hebrew text.
+
+## Usage
+
+To use HebrewBoto, you can import the necessary classes from the `hebrewboto` package and use them in your code. For example:
+
+```python
+from hebrew_tokenizer import HebrewTokenizer
+
+tokenizer = HebrewTokenizer()
+words = tokenizer.tokenize('זהו טקסט בעברית')
+print(words)
+# Output: ['זהו', 'טקסט', 'בעברית']
+```
+
+## Classes
+
+### `HebrewText`
+
+A class representing a piece of Hebrew text. It has methods for getting the text, setting the text, and getting the number of words in the text.
+
+### `HebrewTokenizer`
+
+A class for tokenizing Hebrew text into individual words. It has a method for tokenizing a given piece of text.
+
+### `HebrewSpellChecker`
+
+A class for checking the spelling of Hebrew words. It has a method for checking the spelling of a given word.
+
+### `HebrewGrammarChecker`
+
+A class for checking the grammar of Hebrew text. It has a method for checking the grammar of a given piece of text.
+
+### `HebrewVocabularyBuilder`
+
+A class for building a vocabulary of Hebrew words from a given piece of text. It has a method for building the vocabulary.
+
+### `HebrewQuizGenerator`
+
+A class for generating quizzes based on a given piece of Hebrew text. It has a method for generating a quiz.
+```
+
+assets/sample_text.txt
+```
+זהו טקסט בעברית. הטקסט מכיל מילים שונות ומשפטים רבים. זהו דוגמה לטקסט שאפשר לעבוד איתו באמצעות הכלים של HebrewBoto.
+```
+
+templates/index.html
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HebrewBoto</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <h1>HebrewBoto</h1>
+    <form id="spell-check-form">
+        <label for="spell-check-text">Spell Check:</label>
+        <input type="text" id="spell-check-text" name="text">
+        <button type="submit">Check</button>
+    </form>
+    <div id="spell-check-results"></div>
+    <form id="grammar-check-form">
+        <label for="grammar-check-text">Grammar Check:</label>
+        <input type="text" id="grammar-check-text" name="text">
+        <button type="submit">Check</button>
+    </form>
+    <div id="grammar-check-results"></div>
+    <form id="vocabulary-form">
+        <label for="vocabulary-text">Vocabulary:</label>
+        <input type="text" id="vocabulary-text" name="text">
+        <button type="submit">Build</button>
+    </form>
+    <div id="vocabulary-results"></div>
+    <form id="quiz-form">
+        <label for="quiz-text">Quiz:</label>
+        <input type="text" id="quiz-text" name="text">
+        <button type="submit">Generate</button>
+    </form>
+    <div id="quiz-results"></div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+```
+
+static/css/main.css
+```css
+body {
+    font-family: Arial, sans-serif;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"] {
+    width: 300px;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+button[type="submit"] {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #3E8E41;
+}
+
+#error-message {
+    color: red;
+    font-weight: bold;
+}
+```
+
+static/js/main.js
+```javascript
+const spellCheckForm = document.querySelector('#spell-check-form');
+const spellCheckResults = document.querySelector('#spell-check-results');
+const grammarCheckForm = document.querySelector('#grammar-check-form');
+const grammarCheckResults = document.querySelector('#grammar-check-results');
+const vocabularyForm = document.querySelector('#vocabulary-form');
+const vocabularyResults = document.querySelector('#vocabulary-results');
+const quizForm = document.querySelector('#quiz-form');
+const quizResults = document.querySelector('#quiz-results');
+
+spellCheckForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const text = event.target.elements.text.value

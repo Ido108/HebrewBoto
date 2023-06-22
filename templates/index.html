@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HebrewBoto</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <h1>HebrewBoto</h1>
+    <form id="spell-check-form">
+        <label for="spell-check-text">Spell Check:</label>
+        <input type="text" id="spell-check-text" name="text">
+        <button type="submit">Check</button>
+    </form>
+    <div id="spell-check-results"></div>
+    <form id="grammar-check-form">
+        <label for="grammar-check-text">Grammar Check:</label>
+        <input type="text" id="grammar-check-text" name="text">
+        <button type="submit">Check</button>
+    </form>
+    <div id="grammar-check-results"></div>
+    <form id="vocabulary-form">
+        <label for="vocabulary-text">Vocabulary:</label>
+        <input type="text" id="vocabulary-text" name="text">
+        <button type="submit">Build</button>
+    </form>
+    <div id="vocabulary-results"></div>
+    <form id="quiz-form">
+        <label for="quiz-text">Quiz:</label>
+        <input type="text" id="quiz-text" name="text">
+        <button type="submit">Generate</button>
+    </form>
+    <div id="quiz-results"></div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
