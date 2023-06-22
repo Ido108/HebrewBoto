@@ -6,11 +6,12 @@ HebrewBoto is a Python package for working with Hebrew text. It provides functio
 
 ## Usage
 
-To use HebrewBoto, you can import the necessary classes from the `hebrewboto` package and use them in your code. For example:
-''' python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt '''
+To use HebrewBoto, you can import the necessary classes from the `hebrewboto` package and use them in your code.
 
-''' export FLASK_APP=src/app.py
+git clone https://github.com/Ido108/HebrewBoto
+cd HebrewBoto
+pip install -r requirements.txt
+
+ export FLASK_APP=src/app.py
 export FLASK_ENV=development
-flask run '''
+flask run 
